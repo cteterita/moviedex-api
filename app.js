@@ -7,7 +7,8 @@ const MOVIEDEX = require('./movies-data-small.json')
 
 const app = express();
 
-app.use(morgan('common'));
+const morganSetting = process.env.NODE_ENV === 'production' ? 'tiny' : 'common';
+app.use(morgan(morganSetting));
 app.use(helmet());
 app.use(cors());
 
@@ -18,6 +19,16 @@ app.use((req, res, next) => {
         res.send(401);
     }
     next();
+});
+
+app.use((error, req, res, next) => {
+    let response;
+    if (process.env.NODE_ENV === 'production') {
+        response = { error: { message: 'server error' }};
+    } else {
+        response = { error };
+    }
+    res.status(500).json(response);
 });
 
 function handleGetMovies(req, res) {
