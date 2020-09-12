@@ -22,7 +22,21 @@ app.use((req, res, next) => {
 
 function handleGetMovies(req, res) {
     let results = MOVIEDEX;
-    return res.send(200, results);
+    const { genre, country, avg_vote } = req.query;
+    if (genre) {
+        results = results.filter(movie => movie.genre.toLowerCase().includes(genre.toLowerCase()));
+    }
+    if (country) {
+        results = results.filter(movie => movie.country.toLowerCase().includes(country.toLowerCase()));
+    }
+    if (avg_vote) {
+        voteNumber = Number(avg_vote);
+        if (isNaN(voteNumber)) {
+            return res.status(400).send('avg_vote must be a number');
+        }
+        results = results.filter(movie => movie.avg_vote > voteNumber);
+    }
+    return res.status(200).send(results);
 }
 
 app.get('/movies', handleGetMovies);
